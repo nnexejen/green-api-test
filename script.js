@@ -1,3 +1,4 @@
+// Основной URL для подключения
 const BASE_URL = 'https://api.green-api.com/waInstance';
 
 // Получаем учётные данные
@@ -19,7 +20,7 @@ async function callApi(method, body = null) {
   }
 
   // Формируем URL
-  const url = `${BASE_URL}/${idInstance}/${method}/${apiToken}`;
+  const url = `${BASE_URL}${idInstance}/${method}/${apiToken}`;
   console.log('Request URL:', url);
   
 try {
