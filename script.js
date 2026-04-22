@@ -20,21 +20,36 @@ async function callApi(method, body = null) {
 
   // Формируем URL
   const url = `${BASE_URL}/${idInstance}/${method}/${apiToken}`;
+  console.log('Request URL:', url);
   
-  try {
-    const response = await fetch(url, {
-      method: body ? 'POST' : 'GET',
-      headers: { 
-        'Content-Type': 'application/json' 
-      },
-      body: body ? JSON.stringify(body) : null
-    });
+try {
+    // Формируем опции запроса
+    const fetchOptions = {
+      method: body ? 'POST' : 'GET'
+    };
     
-    // Парсим ответ (пока любой)
-    const data = await response.json();
+    // Добавляем заголовок Content-Type ТОЛЬКО для POST-запросов с телом
+    
+    if (body) {
+      fetchOptions.headers = { 
+        'Content-Type': 'application/json' 
+      };
+      fetchOptions.body = JSON.stringify(body);
+    }
+    
+    const response = await fetch(url, fetchOptions);
+    
+    // Безопасный парсинг ответа
+    let data;
+    const contentType = response.headers.get('content-type');
+    if (contentType && contentType.includes('application/json')) {
+      data = await response.json();
+    } else {
+      data = await response.text();
+    }
     
     // Проверяем на ошибки HTTP (4xx, 5xx)
-    if (!response.ok) {
+   if (!response.ok) {
       const errorMessage = `HTTP ${response.status}: ${response.statusText}\n\n${JSON.stringify(data, null, 2)}`;
       document.getElementById('responseOutput').value = errorMessage;
       console.warn(`HTTP ${response.status}:`, data);
@@ -42,12 +57,12 @@ async function callApi(method, body = null) {
     }
     
     // Выводим ответ
-    document.getElementById('responseOutput').value = JSON.stringify(data, null, 2);
+   document.getElementById('responseOutput').value = JSON.stringify(data, null, 2);
     return data;
     
   } catch (error) {
-    // Сетевая ошибка (нет интернета, сервер недоступен и т.д.)
-    document.getElementById('responseOutput').value = `Сетевая ошибка: ${error.message}\n\nПроверьте подключение к интернету.`;
+    // Сетевая ошибка
+    document.getElementById('responseOutput').value = `Сетевая ошибка: ${error.message}\n\nПроверьте:\n- Подключение к интернету\n- Корректность baseUrl, idInstance и apiToken\n- Статус инстанса (должен быть authorized)`;
     console.error('Fetch error:', error);
     return null;
   }
@@ -56,6 +71,7 @@ async function callApi(method, body = null) {
 // Автоматическое добавление @c.us, если не указано
 function formatChatId(chatId) {
   if (!chatId) return '';
+  // Если уже есть суффикс (@c.us, @g.us и т.д.) — не меняем
   return chatId.includes('@') ? chatId : `${chatId}@c.us`;
 }
 
@@ -63,6 +79,7 @@ function formatChatId(chatId) {
 function extractFileName(urlFile) {
   try {
     const fileName = urlFile.split('/').pop();
+    // Если в конце есть точка с расширением — используем, иначе стандартное имя
     return (fileName && fileName.includes('.')) ? fileName : 'document';
   } catch {
     return 'document';
@@ -100,9 +117,9 @@ async function sendMessage() {
   // Форматируем chatId (добавляем @c.us, если нужно)
   const formattedChatId = formatChatId(chatId);
   
-  await callApi('sendMessage', { 
-    chatId: formattedChatId, 
-    message: message 
+  await callApi('sendMessage', {
+    chatId: formattedChatId,
+    message: message
   });
 }
 
@@ -130,5 +147,5 @@ async function sendFileByUrl() {
 }
 
 // Инициализация
-console.log('GREEN-API скрипт загружен. Готов к работе.');
-console.log('idInstance: ', document.getElementById('idInstance').value || 'не указан');
+console.log('GREEN-API script loaded');
+console.log(`Base URL: ${BASE_URL}`);
