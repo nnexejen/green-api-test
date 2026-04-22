@@ -1,4 +1,4 @@
-const BASE_URL = 'https://1105.api.green-api.com/waInstance';
+const BASE_URL = 'https://api.green-api.com/waInstance';
 
 // Получаем учётные данные
 function getCredentials() {
