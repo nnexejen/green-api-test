@@ -1,4 +1,4 @@
-const BASE_URL = 'https://1105.api.green-api.com';
+const BASE_URL = 'https://1105.api.green-api.com/waInstance';
 
 // Получаем учётные данные
 function getCredentials() {
@@ -24,19 +24,11 @@ async function callApi(method, body = null) {
   
 try {
     // Формируем опции запроса
-    const fetchOptions = {
-      method: body ? 'POST' : 'GET'
-    };
-    
-    // Добавляем заголовок Content-Type ТОЛЬКО для POST-запросов с телом
-    
+    const fetchOptions = { method: body ? 'POST' : 'GET' };
     if (body) {
-      fetchOptions.headers = { 
-        'Content-Type': 'application/json' 
-      };
+      fetchOptions.headers = { 'Content-Type': 'application/json' };
       fetchOptions.body = JSON.stringify(body);
     }
-    
     const response = await fetch(url, fetchOptions);
     
     // Безопасный парсинг ответа
